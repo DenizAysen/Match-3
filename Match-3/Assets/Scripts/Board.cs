@@ -7,6 +7,7 @@ public class Board : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private int width;
     [SerializeField] private int height;
+    [SerializeField] private float gemSpeed;
 
     [Header("Elements")]
     [SerializeField] private GameObject bgTilePrefab;
@@ -46,5 +47,18 @@ public class Board : MonoBehaviour
         allGems[spawnPos.x, spawnPos.y] = gem;
 
         gem.SetupGem(spawnPos, this);
+    }
+
+    public int GetBoardWidth()
+    {
+        return width;
+    }
+    public int GetBoardHeight()
+    {
+        return height;
+    }
+    public float GetGemSpeed()
+    {
+        return gemSpeed;
     }
 }

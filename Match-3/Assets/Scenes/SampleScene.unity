@@ -263,6 +263,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 7
   height: 7
+  gemSpeed: 7
   bgTilePrefab: {fileID: 5182464168651580638, guid: 054645f3a0fd1314ea3bbbdeaff021fe, type: 3}
   gems:
   - {fileID: 9002566272668283764, guid: 7e9a238dc43d6e14ca07589989f9a685, type: 3}
