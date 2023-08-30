@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//using System;
 public class Board : MonoBehaviour
 {
     [Header("Settings")]
@@ -13,17 +13,29 @@ public class Board : MonoBehaviour
     [SerializeField] private GameObject bgTilePrefab;
     public Gem[] gems;
     public Gem[,] allGems;
+    public BoardState currentState = BoardState.move;
+
 
     int gemToUse;
     private Gem gem;
     private Vector2 pos;
     private GameObject bgTile;
+   public MatchFinder matchFinder;
+    //public static Action findAllMatches;
+    private void Awake()
+    {
+        matchFinder = FindObjectOfType<MatchFinder>();
+    }
     void Start()
     {
         allGems = new Gem[width, height];
 
         SetupTheBoard();
     }
+    //private void Update()
+    //{
+    //    matchFinder.FindAllMatches();
+    //}
     private void SetupTheBoard()
     {
         for (int x = 0; x < width; x++)
@@ -35,20 +47,160 @@ public class Board : MonoBehaviour
                 bgTile.name = "BG Tile - " + x + ", " + y;
 
                 gemToUse = Random.Range(0, gems.Length);
+                int iterations = 0;
+                while(MatchesAt(new Vector2Int(x,y), gems[gemToUse]) && iterations < 100)
+                {
+                    gemToUse = Random.Range(0, gems.Length);
+                    iterations++;
+                }
+
                 SpawnGem(new Vector2Int(x,y), gems[gemToUse]);
             }
         }
     }
     private void SpawnGem(Vector2Int spawnPos , Gem gemToSpawn)
     {
-        gem = Instantiate(gemToSpawn, new Vector3(spawnPos.x, spawnPos.y,0), Quaternion.identity);
+        gem = Instantiate(gemToSpawn, new Vector3(spawnPos.x, spawnPos.y + height,0), Quaternion.identity);
         gem.transform.parent = transform;
         gem.name = "Gem - " + pos.x + ", " + pos.y;
         allGems[spawnPos.x, spawnPos.y] = gem;
 
         gem.SetupGem(spawnPos, this);
     }
+    private bool MatchesAt(Vector2Int posToCheck, Gem gemToCheck)
+    {
+        if(posToCheck.x > 1)
+        {
+            if(allGems[posToCheck.x-1, posToCheck.y].gemType == gemToCheck.gemType && (allGems[posToCheck.x - 2, posToCheck.y].gemType == gemToCheck.gemType))
+            {
+                return true;
+            }
+        }
+        if (posToCheck.y > 1)
+        {
+            if (allGems[posToCheck.x , posToCheck.y - 1].gemType == gemToCheck.gemType && (allGems[posToCheck.x , posToCheck.y - 2].gemType == gemToCheck.gemType))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    private void DestroyMatchedGemAt(Vector2Int pos)
+    {
+        if (allGems[pos.x, pos.y] != null)
+        {
+            if(allGems[pos.x, pos.y].isMatched)
+            {
+                Destroy(allGems[pos.x, pos.y].gameObject);
+                allGems[pos.x, pos.y] = null;
+            }
+        }
+    }
+    public void DestroyMatches()
+    {
+        for (int i = 0; i < matchFinder.currentMatches.Count; i++)
+        {
+            if(matchFinder.currentMatches[i] != null)
+            {
+                DestroyMatchedGemAt(matchFinder.currentMatches[i].posIndex);
+            }
+        }
+        StartCoroutine(DecreaseRowCo());
+    }
+    private IEnumerator DecreaseRowCo()
+    {
+        yield return new WaitForSeconds(.2f);
+        int nullCounter = 0;
 
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if(allGems[x,y] == null)
+                {
+                    nullCounter++;
+                }
+                else if(nullCounter > 0)
+                {
+                    allGems[x, y].posIndex.y -= nullCounter;
+                    allGems[x, y - nullCounter] = allGems[x, y];
+                    allGems[x, y] = null;
+                }
+            }
+            nullCounter = 0;
+        }
+        StartCoroutine(FillBoardCo());
+    }
+    private IEnumerator FillBoardCo()
+    {
+        //Boards empty places are refilled
+        yield return new WaitForSeconds(.5f);
+        RefillBoard();
+
+        //Then we check the matches again
+        yield return new WaitForSeconds(.5f);
+        matchFinder.FindAllMatches();
+
+        //if there is a match we destroy the matches again until no match remains
+        if(matchFinder.currentMatches.Count > 0)
+        {
+            yield return new WaitForSeconds(.5f);
+            DestroyMatches();
+        }
+        //if there is no match then player can make a new move
+        else
+        {
+            yield return new WaitForSeconds(.5f);
+            ChangeBoardState(BoardState.move);
+        }
+    }
+    private void RefillBoard()
+    {
+        //We check empty places of the board
+        // When we find the empty place, we fill the place with gem
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if(allGems[x,y] == null)
+                {
+                    int gemToUse = Random.Range(0, gems.Length);
+
+                    SpawnGem(new Vector2Int(x, y), gems[gemToUse]);
+                }               
+            }
+        }
+        //
+        CheckMisplacedGems();
+    }
+    private void CheckMisplacedGems()
+    {
+        //If there is 2 gems in the same place we destry one of them
+
+        List<Gem> foundGems = new();
+        foundGems.AddRange(FindObjectsOfType<Gem>());
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (foundGems.Contains(allGems[x, y]))
+                {
+                    foundGems.Remove(allGems[x, y]);
+                }
+            }
+        }
+
+        foreach (Gem gem in foundGems)
+        {
+            Destroy(gem.gameObject);
+        }
+    }
+    public void ChangeBoardState(BoardState state)
+    {
+        currentState = state;
+    }
+    #region GetMethods
     public int GetBoardWidth()
     {
         return width;
@@ -61,4 +213,5 @@ public class Board : MonoBehaviour
     {
         return gemSpeed;
     }
+    #endregion
 }

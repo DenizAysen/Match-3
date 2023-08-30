@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Gem : MonoBehaviour
 {
-    //[HideInInspector]
+    [HideInInspector]
     public Vector2Int posIndex;
     //[HideInInspector]
     public Board board;
@@ -16,6 +16,9 @@ public class Gem : MonoBehaviour
 
     private Gem otherGem;
 
+    public GemType gemType;
+    public bool isMatched;
+    private Vector2Int previousPos;
     void Start()
     {
         
@@ -35,8 +38,12 @@ public class Gem : MonoBehaviour
         if (mousePressed && Input.GetMouseButtonUp(0))
         {
             mousePressed = false;
-            finalTouchPos = Input.mousePosition;
-            CalculateAngle();
+
+            if(board.currentState == BoardState.move)
+            {
+                finalTouchPos = Input.mousePosition;
+                CalculateAngle();
+            }          
         }
     }
     public void SetupGem(Vector2Int pos , Board theBoard)
@@ -46,8 +53,11 @@ public class Gem : MonoBehaviour
     }
     private void OnMouseDown()
     {
-        firstTouchPos = Input.mousePosition;   
-        mousePressed = true;
+        if(board.currentState == BoardState.move)
+        {
+            firstTouchPos = Input.mousePosition;
+            mousePressed = true;
+        }     
     }
     private void CalculateAngle()
     {
@@ -60,6 +70,7 @@ public class Gem : MonoBehaviour
     }
     private void MovePieces()
     {
+        previousPos = posIndex;
         if (swipeAngel < 45 && swipeAngel > -45 && posIndex.x < board.GetBoardWidth() - 1)
         {
             otherGem = board.allGems[posIndex.x + 1, posIndex.y];
@@ -86,5 +97,38 @@ public class Gem : MonoBehaviour
         }
         board.allGems[posIndex.x, posIndex.y] = this;
         board.allGems[otherGem.posIndex.x, otherGem.posIndex.y] = otherGem;
+
+        StartCoroutine(CheckMoveCor());
+    }
+    public IEnumerator CheckMoveCor()
+    {
+        board.ChangeBoardState(BoardState.wait);
+
+        yield return new WaitForSeconds(.5f);
+
+        board.matchFinder.FindAllMatches();
+
+        if(otherGem != null)
+        {
+            // if there is no match gems return their orginal positions and player will be able to make a move again
+            if (!isMatched && !otherGem.isMatched)
+            {
+                otherGem.posIndex = posIndex;
+                posIndex = previousPos;
+
+                board.allGems[posIndex.x, posIndex.y] = this;
+                board.allGems[otherGem.posIndex.x, otherGem.posIndex.y] = otherGem;
+
+                yield return new WaitForSeconds(.5f);
+
+                board.ChangeBoardState(BoardState.move);
+
+                Debug.Log("Bu noktaya gelindi");
+            }
+            else
+            {
+                board.DestroyMatches();
+            }
+        }
     }
 }
