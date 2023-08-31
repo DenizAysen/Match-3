@@ -4,7 +4,8 @@ public enum GemType
     green,
     red,
     yellow,
-    purple
+    purple,
+    bomb
 }
 public enum BoardState
 {

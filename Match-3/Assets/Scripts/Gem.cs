@@ -9,6 +9,10 @@ public class Gem : MonoBehaviour
     //[HideInInspector]
     public Board board;
 
+    public GameObject destroyEffect;
+
+    public int blastSize = 2;
+
     private Vector3 firstTouchPos, finalTouchPos;
 
     private bool mousePressed;

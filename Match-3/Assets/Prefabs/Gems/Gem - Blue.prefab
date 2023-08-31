@@ -100,6 +100,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   posIndex: {x: 0, y: 0}
   board: {fileID: 0}
+  destroyEffect: {fileID: 747728308584866837, guid: 7d69ee0d292f53a488b0ecba54c949de, type: 3}
+  gemType: 0
+  isMatched: 0
 --- !u!61 &3125173757999620103
 BoxCollider2D:
   m_ObjectHideFlags: 0

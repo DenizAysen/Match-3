@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be6122c6c02852346af6ac28b76d9633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentMatches: []
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,6 +309,7 @@ MonoBehaviour:
   width: 7
   height: 7
   gemSpeed: 7
+  bombChance: 2
   bgTilePrefab: {fileID: 5182464168651580638, guid: 054645f3a0fd1314ea3bbbdeaff021fe, type: 3}
   gems:
   - {fileID: 9002566272668283764, guid: 7e9a238dc43d6e14ca07589989f9a685, type: 3}
@@ -315,6 +317,9 @@ MonoBehaviour:
   - {fileID: 354424863048887216, guid: 7cf0eda8dccf4bb4bad86d2d834bafd0, type: 3}
   - {fileID: 7258364836524243612, guid: 6db925690ae56254fb99ef7be186460c, type: 3}
   - {fileID: 6378342275416176426, guid: 479ebff6246b9bd4ba7ff1162a30fc53, type: 3}
+  currentState: 1
+  Bomb: {fileID: 7155015155830617212, guid: 9deb6450b8112ff49a15e2fb50b3c296, type: 3}
+  matchFinder: {fileID: 0}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

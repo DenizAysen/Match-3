@@ -8,13 +8,14 @@ public class Board : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private float gemSpeed;
+    [SerializeField] private float bombChance = 2f;
 
     [Header("Elements")]
     [SerializeField] private GameObject bgTilePrefab;
     public Gem[] gems;
     public Gem[,] allGems;
     public BoardState currentState = BoardState.move;
-
+    [SerializeField] private Gem Bomb;
 
     int gemToUse;
     private Gem gem;
@@ -32,10 +33,13 @@ public class Board : MonoBehaviour
 
         SetupTheBoard();
     }
-    //private void Update()
-    //{
-    //    matchFinder.FindAllMatches();
-    //}
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            ShuffleTheboard();
+        }
+    }
     private void SetupTheBoard()
     {
         for (int x = 0; x < width; x++)
@@ -60,6 +64,11 @@ public class Board : MonoBehaviour
     }
     private void SpawnGem(Vector2Int spawnPos , Gem gemToSpawn)
     {
+        if(Random.Range(0f,100f) < bombChance)
+        {
+            gemToSpawn = Bomb;
+        }
+
         gem = Instantiate(gemToSpawn, new Vector3(spawnPos.x, spawnPos.y + height,0), Quaternion.identity);
         gem.transform.parent = transform;
         gem.name = "Gem - " + pos.x + ", " + pos.y;
@@ -91,6 +100,8 @@ public class Board : MonoBehaviour
         {
             if(allGems[pos.x, pos.y].isMatched)
             {
+                Instantiate(allGems[pos.x, pos.y].destroyEffect, new Vector2(pos.x, pos.y), Quaternion.identity);
+
                 Destroy(allGems[pos.x, pos.y].gameObject);
                 allGems[pos.x, pos.y] = null;
             }
@@ -199,6 +210,40 @@ public class Board : MonoBehaviour
     public void ChangeBoardState(BoardState state)
     {
         currentState = state;
+    }
+    private void ShuffleTheboard()
+    {
+        if(currentState != BoardState.wait)
+        {
+            currentState = BoardState.wait;
+            List<Gem> gemsFromBoard = new();
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    gemsFromBoard.Add(allGems[x, y]);
+                    allGems[x, y] = null;
+                }
+            }
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    gemToUse = Random.Range(0, gemsFromBoard.Count);
+                    int iterations = 0;
+                    while (MatchesAt(new Vector2Int(x, y), gemsFromBoard[gemToUse]) && iterations <100 && gemsFromBoard.Count > 1)
+                    {
+                        gemToUse = Random.Range(0, gemsFromBoard.Count);
+                        iterations++;
+                    }
+                    gemsFromBoard[gemToUse].SetupGem(new Vector2Int(x, y), this);
+                    allGems[x, y] = gemsFromBoard[gemToUse];
+                    gemsFromBoard.RemoveAt(gemToUse);
+                }
+            }
+            StartCoroutine(FillBoardCo());
+        }
     }
     #region GetMethods
     public int GetBoardWidth()
