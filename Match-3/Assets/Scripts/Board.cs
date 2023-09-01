@@ -21,11 +21,13 @@ public class Board : MonoBehaviour
     private Gem gem;
     private Vector2 pos;
     private GameObject bgTile;
-   public MatchFinder matchFinder;
+    public MatchFinder matchFinder;
+    //private RoundManager roundManager;
     //public static Action findAllMatches;
     private void Awake()
     {
         matchFinder = FindObjectOfType<MatchFinder>();
+       // roundManager = FindObjectOfType<RoundManager>();
     }
     void Start()
     {

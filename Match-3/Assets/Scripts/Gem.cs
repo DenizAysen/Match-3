@@ -43,7 +43,7 @@ public class Gem : MonoBehaviour
         {
             mousePressed = false;
 
-            if(board.currentState == BoardState.move)
+            if(board.currentState == BoardState.move && RoundManager.Instance.GetCurrentRoundTime() > 0)
             {
                 finalTouchPos = Input.mousePosition;
                 CalculateAngle();
@@ -57,7 +57,7 @@ public class Gem : MonoBehaviour
     }
     private void OnMouseDown()
     {
-        if(board.currentState == BoardState.move)
+        if(board.currentState == BoardState.move && RoundManager.Instance.GetCurrentRoundTime() > 0)
         {
             firstTouchPos = Input.mousePosition;
             mousePressed = true;
