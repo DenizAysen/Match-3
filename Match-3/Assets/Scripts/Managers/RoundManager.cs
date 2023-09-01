@@ -8,7 +8,12 @@ public class RoundManager : MonoBehaviour
 
     private UIManager _uiManager;
     private Board _board;
+
     private bool endingRound = false;
+
+    private int _currentScore;
+    public float displayScore;
+    public float scoreSpeed;
     #region Singleton
     public static RoundManager Instance;
     private void Awake()
@@ -26,6 +31,10 @@ public class RoundManager : MonoBehaviour
         }
     }
     #endregion
+    private void Start()
+    {
+        _uiManager.ChangeScoreText(_currentScore);
+    }
     void Update()
     {
         if(roundTime > 0f)
@@ -53,5 +62,18 @@ public class RoundManager : MonoBehaviour
     public float GetCurrentRoundTime()
     {
         return roundTime;
+    }
+    public void ChangeScore(int score)
+    {
+        _currentScore += score;
+        //if (_currentScore < 0)
+        //{
+        //    _currentScore = 0;
+        //}
+        _uiManager.ChangeScoreText(_currentScore);
+    }
+    private IEnumerator ScoreTextChange()
+    {
+        yield return null;
     }
 }

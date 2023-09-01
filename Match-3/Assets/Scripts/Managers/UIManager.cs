@@ -23,6 +23,10 @@ public class UIManager : MonoBehaviour
     {
         timeText.text = value.ToString("0.0") + "s";
     }
+    public void ChangeScoreText(int score)
+    {
+        scoreText.text = score.ToString();
+    }
 
     public void ActivateRoundOverPanel()
     {

@@ -115,6 +115,8 @@ public class Board : MonoBehaviour
         {
             if(matchFinder.currentMatches[i] != null)
             {
+                ScoreCheck(matchFinder.currentMatches[i]);
+
                 DestroyMatchedGemAt(matchFinder.currentMatches[i].posIndex);
             }
         }
@@ -246,6 +248,10 @@ public class Board : MonoBehaviour
             }
             StartCoroutine(FillBoardCo());
         }
+    }
+    public void ScoreCheck(Gem gemToCheck)
+    {
+        RoundManager.Instance.ChangeScore(gemToCheck.scoreValue);
     }
     #region GetMethods
     public int GetBoardWidth()

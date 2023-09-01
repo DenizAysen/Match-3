@@ -11,13 +11,14 @@ public class Gem : MonoBehaviour
 
     public GameObject destroyEffect;
 
+    [Header("Settings")]
     public int blastSize = 2;
 
     private Vector3 firstTouchPos, finalTouchPos;
 
     private bool mousePressed;
     private float swipeAngel = 0;
-
+    public int scoreValue = 10;
     private Gem otherGem;
 
     public GemType gemType;
