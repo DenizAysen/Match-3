@@ -14,6 +14,7 @@ public class RoundManager : MonoBehaviour
     private int _currentScore;
     public float displayScore;
     public float scoreSpeed;
+    public int scoreTarget1,scoreTarget2,scoreTarget3;
     #region Singleton
     public static RoundManager Instance;
     private void Awake()
@@ -58,6 +59,27 @@ public class RoundManager : MonoBehaviour
     private void WinCheck()
     {
         _uiManager.ActivateRoundOverPanel();
+
+        _uiManager.ChangeWinScoreText(_currentScore);
+
+        if (_currentScore >= scoreTarget3)
+        {
+            _uiManager.ChangeWinText(true);
+            _uiManager.ActivateStars(3);
+        }
+        else if (_currentScore >= scoreTarget2)
+        {
+            _uiManager.ChangeWinText(true);
+            _uiManager.ActivateStars(2);
+        }
+        else if (_currentScore >= scoreTarget1)
+        {
+            _uiManager.ChangeWinText(true);
+            _uiManager.ActivateStars(1);
+        }
+        else
+            _uiManager.ChangeWinText(false);
+
     }
     public float GetCurrentRoundTime()
     {
@@ -66,14 +88,17 @@ public class RoundManager : MonoBehaviour
     public void ChangeScore(int score)
     {
         _currentScore += score;
-        //if (_currentScore < 0)
-        //{
-        //    _currentScore = 0;
-        //}
-        _uiManager.ChangeScoreText(_currentScore);
+        StartCoroutine(ScoreTextChangeAnim());
     }
-    private IEnumerator ScoreTextChange()
-    {
-        yield return null;
+    private IEnumerator ScoreTextChangeAnim()
+    {    
+        while(displayScore < _currentScore )
+        {
+            yield return new WaitForSeconds(.1f);
+            displayScore = Mathf.Lerp(displayScore, _currentScore, scoreSpeed*Time.deltaTime);
+            _uiManager.ChangeScoreText(displayScore);
+            if (_currentScore - displayScore < 3f)
+                displayScore = _currentScore;
+        }
     }
 }

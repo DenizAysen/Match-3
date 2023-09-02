@@ -9,6 +9,7 @@ public class Board : MonoBehaviour
     [SerializeField] private int height;
     [SerializeField] private float gemSpeed;
     [SerializeField] private float bombChance = 2f;
+    [SerializeField] private float bonusAmount = .5f;
 
     [Header("Elements")]
     [SerializeField] private GameObject bgTilePrefab;
@@ -22,6 +23,7 @@ public class Board : MonoBehaviour
     private Vector2 pos;
     private GameObject bgTile;
     public MatchFinder matchFinder;
+    private float bonusMultiplier;
     //private RoundManager roundManager;
     //public static Action findAllMatches;
     private void Awake()
@@ -159,6 +161,7 @@ public class Board : MonoBehaviour
         //if there is a match we destroy the matches again until no match remains
         if(matchFinder.currentMatches.Count > 0)
         {
+            bonusMultiplier++;
             yield return new WaitForSeconds(.5f);
             DestroyMatches();
         }
@@ -167,6 +170,7 @@ public class Board : MonoBehaviour
         {
             yield return new WaitForSeconds(.5f);
             ChangeBoardState(BoardState.move);
+            bonusMultiplier = 0;
         }
     }
     private void RefillBoard()
@@ -252,6 +256,12 @@ public class Board : MonoBehaviour
     public void ScoreCheck(Gem gemToCheck)
     {
         RoundManager.Instance.ChangeScore(gemToCheck.scoreValue);
+        
+        if(bonusMultiplier > 0)
+        {
+            float bonusToAdd = gemToCheck.scoreValue * bonusMultiplier * bonusAmount;
+            RoundManager.Instance.ChangeScore(Mathf.RoundToInt(bonusToAdd));
+        }
     }
     #region GetMethods
     public int GetBoardWidth()
