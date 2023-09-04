@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-//using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class UIManager : MonoBehaviour
 {
     [Header("Elements")]
@@ -18,9 +18,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject[] stars;
     #endregion
     [SerializeField] private Color loseTextColor;
-    void Start()
-    {
-        
+    private Board theBoard;
+    public string levelSelect;
+    private void Awake()
+    {        
+        theBoard = FindObjectOfType<Board>();
     }
     #region GamePanel
     public void ChangeTimeText(float value)
@@ -30,6 +32,10 @@ public class UIManager : MonoBehaviour
     public void ChangeScoreText(float score)
     {
         scoreText.text = score.ToString("0");
+    }
+    public void ShuffleBoard()
+    {
+        theBoard.ShuffleTheboard();
     }
     #endregion
 
@@ -68,6 +74,14 @@ public class UIManager : MonoBehaviour
         winText.color = loseTextColor;
         winScoreTextLabel.color = loseTextColor;
         winScoreText.color = loseTextColor;
+    }
+    public void LevelSelectButton()
+    {
+        SceneManager.LoadScene(levelSelect);
+    }
+    public void TryAgain()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     #endregion 
 }

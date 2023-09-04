@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class RoundManager : MonoBehaviour
 {
     [SerializeField] private float roundTime = 60f;
@@ -10,7 +10,7 @@ public class RoundManager : MonoBehaviour
     private Board _board;
 
     private bool endingRound = false;
-
+    private string sceneName;
     private int _currentScore;
     public float displayScore;
     public float scoreSpeed;
@@ -35,6 +35,7 @@ public class RoundManager : MonoBehaviour
     private void Start()
     {
         _uiManager.ChangeScoreText(_currentScore);
+        sceneName = SceneManager.GetActiveScene().name;
     }
     void Update()
     {
@@ -66,20 +67,30 @@ public class RoundManager : MonoBehaviour
         {
             _uiManager.ChangeWinText(true);
             _uiManager.ActivateStars(3);
+
+            PlayerPrefs.SetInt(sceneName + "_Star1", 1);
+            PlayerPrefs.SetInt(sceneName + "_Star2", 1);
+            PlayerPrefs.SetInt(sceneName + "_Star3", 1);
         }
         else if (_currentScore >= scoreTarget2)
         {
             _uiManager.ChangeWinText(true);
             _uiManager.ActivateStars(2);
+
+            PlayerPrefs.SetInt(sceneName + "_Star1", 1);
+            PlayerPrefs.SetInt(sceneName + "_Star2", 1);
         }
         else if (_currentScore >= scoreTarget1)
         {
             _uiManager.ChangeWinText(true);
             _uiManager.ActivateStars(1);
+
+            PlayerPrefs.SetInt(sceneName + "_Star1", 1);
         }
         else
             _uiManager.ChangeWinText(false);
 
+        SfxManager.Instance.PlayRoundOver();
     }
     public float GetCurrentRoundTime()
     {

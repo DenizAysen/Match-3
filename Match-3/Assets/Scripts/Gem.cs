@@ -58,7 +58,7 @@ public class Gem : MonoBehaviour
     }
     private void OnMouseDown()
     {
-        if(board.currentState == BoardState.move && RoundManager.Instance.GetCurrentRoundTime() > 0)
+        if(board.currentState == BoardState.move && RoundManager.Instance.GetCurrentRoundTime() > 0 && gemType != GemType.stone)
         {
             firstTouchPos = Input.mousePosition;
             mousePressed = true;

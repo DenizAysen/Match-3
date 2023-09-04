@@ -24,28 +24,32 @@ public class Board : MonoBehaviour
     private GameObject bgTile;
     public MatchFinder matchFinder;
     private float bonusMultiplier;
+
+    private BoardLayout boardLayout;
+    private Gem[,] layoutStore;
     //private RoundManager roundManager;
     //public static Action findAllMatches;
     private void Awake()
     {
         matchFinder = FindObjectOfType<MatchFinder>();
+        boardLayout = GetComponent<BoardLayout>();
        // roundManager = FindObjectOfType<RoundManager>();
     }
     void Start()
     {
         allGems = new Gem[width, height];
 
+        layoutStore = new Gem[width, height];
+
         SetupTheBoard();
-    }
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            ShuffleTheboard();
-        }
     }
     private void SetupTheBoard()
     {
+        if(boardLayout != null)
+        {
+            layoutStore = boardLayout.GetLayout();
+        }
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -54,15 +58,22 @@ public class Board : MonoBehaviour
                 bgTile = Instantiate(bgTilePrefab, pos, Quaternion.identity, transform);
                 bgTile.name = "BG Tile - " + x + ", " + y;
 
-                gemToUse = Random.Range(0, gems.Length);
-                int iterations = 0;
-                while(MatchesAt(new Vector2Int(x,y), gems[gemToUse]) && iterations < 100)
+                if(layoutStore[x,y] != null)
+                {
+                    SpawnGem(new Vector2Int(x, y), layoutStore[x, y]);
+                }
+                else
                 {
                     gemToUse = Random.Range(0, gems.Length);
-                    iterations++;
-                }
+                    int iterations = 0;
+                    while (MatchesAt(new Vector2Int(x, y), gems[gemToUse]) && iterations < 100)
+                    {
+                        gemToUse = Random.Range(0, gems.Length);
+                        iterations++;
+                    }
 
-                SpawnGem(new Vector2Int(x,y), gems[gemToUse]);
+                    SpawnGem(new Vector2Int(x, y), gems[gemToUse]);
+                }              
             }
         }
     }
@@ -104,6 +115,15 @@ public class Board : MonoBehaviour
         {
             if(allGems[pos.x, pos.y].isMatched)
             {
+                if ((allGems[pos.x, pos.y].gemType == GemType.bomb))
+                    SfxManager.Instance.PlayExplode();
+
+                else if ((allGems[pos.x, pos.y].gemType == GemType.stone))
+                    SfxManager.Instance.PlayStoneBreak();
+
+                else
+                    SfxManager.Instance.PlayGemBreak();
+
                 Instantiate(allGems[pos.x, pos.y].destroyEffect, new Vector2(pos.x, pos.y), Quaternion.identity);
 
                 Destroy(allGems[pos.x, pos.y].gameObject);
@@ -219,7 +239,7 @@ public class Board : MonoBehaviour
     {
         currentState = state;
     }
-    private void ShuffleTheboard()
+    public void ShuffleTheboard()
     {
         if(currentState != BoardState.wait)
         {
@@ -239,11 +259,10 @@ public class Board : MonoBehaviour
                 for (int y = 0; y < height; y++)
                 {
                     gemToUse = Random.Range(0, gemsFromBoard.Count);
-                    int iterations = 0;
-                    while (MatchesAt(new Vector2Int(x, y), gemsFromBoard[gemToUse]) && iterations <100 && gemsFromBoard.Count > 1)
+
+                    while (MatchesAt(new Vector2Int(x, y), gemsFromBoard[gemToUse])  && gemsFromBoard.Count > 1)
                     {
                         gemToUse = Random.Range(0, gemsFromBoard.Count);
-                        iterations++;
                     }
                     gemsFromBoard[gemToUse].SetupGem(new Vector2Int(x, y), this);
                     allGems[x, y] = gemsFromBoard[gemToUse];
